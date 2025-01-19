@@ -2,11 +2,11 @@ import * as THREE from 'three';
 
 // Сцена
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x282828); // Темный фон
+scene.background = new THREE.Color(0xf0f0f0); // Нежно-пастельный фон
 
 // Камера
 const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-camera.position.z = 15;
+camera.position.z = 50;
 
 // Рендерер
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -20,38 +20,39 @@ controls.enableDamping = true;
 controls.dampingFactor = 0.25;
 controls.enableZoom = true;
 
-// Освещение
-const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.5); // Мягкое белое освещение
-scene.add(ambientLight);
+// Свет
+const light1 = new THREE.PointLight(0xffc0cb, 1, 50);  // Мягкий розовый свет
+light1.position.set(20, 20, 20);
+scene.add(light1);
 
-const pointLight = new THREE.PointLight(0xFFFFFF, 1, 100);
-pointLight.position.set(0, 0, 10);
-scene.add(pointLight);
+const light2 = new THREE.PointLight(0xadd8e6, 1, 50);  // Светлый голубой
+light2.position.set(-20, -20, -20);
+scene.add(light2);
 
-// Геометрия и материалы для объектов
-const geometry1 = new THREE.SphereGeometry(1, 32, 32); // Сфера
-const geometry2 = new THREE.TorusGeometry(1, 0.4, 16, 100); // Тор
+// Абстрактные геометрии: перекрученные цилиндры и многоугольники
+const geometry1 = new THREE.CylinderGeometry(2, 2, 5, 8); // Перекрученный цилиндр
+const geometry2 = new THREE.ConeGeometry(2, 5, 5); // Многоугольный конус
 
-const materials = [
-  new THREE.MeshStandardMaterial({ color: 0xff0000 }),
-  new THREE.MeshStandardMaterial({ color: 0x00ff00 }),
-  new THREE.MeshStandardMaterial({ color: 0x0000ff }),
-  new THREE.MeshStandardMaterial({ color: 0xffff00 }),
-  new THREE.MeshStandardMaterial({ color: 0x00ffff })
+// Материалы с мягкими цветами
+const pastelColors = [
+  new THREE.MeshStandardMaterial({ color: 0xffb6c1 }), // Розовый
+  new THREE.MeshStandardMaterial({ color: 0x87cefa }), // Голубой
+  new THREE.MeshStandardMaterial({ color: 0xfafad2 }), // Светло-желтый
+  new THREE.MeshStandardMaterial({ color: 0x98fb98 })  // Светло-зеленый
 ];
 
-// Добавление объектов в сцену
-for (let i = 0; i < 200; i++) {
-  const geometry = i % 2 === 0 ? geometry1 : geometry2; // Чередование геометрий
-  const material = materials[Math.floor(Math.random() * materials.length)];
+// Добавление абстрактных объектов в сцену
+for (let i = 0; i < 100; i++) {
+  const geometry = i % 2 === 0 ? geometry1 : geometry2;
+  const material = pastelColors[Math.floor(Math.random() * pastelColors.length)];
 
   const mesh = new THREE.Mesh(geometry, material);
   mesh.position.set(
-    Math.random() * 20 - 10,
-    Math.random() * 20 - 10,
-    Math.random() * 20 - 10
+    Math.random() * 60 - 30,
+    Math.random() * 60 - 30,
+    Math.random() * 60 - 30
   );
-  mesh.scale.set(Math.random() * 2 + 0.5, Math.random() * 2 + 0.5, Math.random() * 2 + 0.5);
+  mesh.scale.set(Math.random() * 3 + 1, Math.random() * 3 + 1, Math.random() * 3 + 1);
 
   scene.add(mesh);
 }
@@ -60,15 +61,16 @@ for (let i = 0; i < 200; i++) {
 function animate() {
   requestAnimationFrame(animate);
 
-  // Плавное вращение объектов
+  // Плавное изменение формы объектов (перекручиваем их)
   scene.traverse((child) => {
     if (child instanceof THREE.Mesh) {
       child.rotation.x += 0.01;
       child.rotation.y += 0.01;
+      child.position.y += Math.sin(child.rotation.x * 2) * 0.05;
     }
   });
 
-  controls.update(); // Обновляем управление камерой
+  controls.update(); // Обновление управления камерой
   renderer.render(scene, camera);
 }
 
